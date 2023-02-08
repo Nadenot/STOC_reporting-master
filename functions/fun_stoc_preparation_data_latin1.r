@@ -1033,7 +1033,7 @@ import <- function(file="extrait.txt",lastYear=NULL,
 
 
     d$BG <- ifelse(is.na(d$BG),d$BAGUEUR,d$BG)
-#    d$BG <- ifelse(is.null(d$BG),d$BAGUEUR,d$BG) #pb avec cette ligne, après toutes les lignes de BG donnent la même valeur
+#    d$BG <- ifelse(is.null(d$BG),d$BAGUEUR,d$BG) #pb avec cette ligne, après toutes les lignes de BG donnent la même valeur Olivier Claessens
     d$BG <- ifelse(d$BG=="",d$BAGUEUR,d$BG)
 
    # write.csv2(d,"dataCeline_2017.csv",row.names=FALSE)
