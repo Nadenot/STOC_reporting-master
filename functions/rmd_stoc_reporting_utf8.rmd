@@ -10,7 +10,7 @@ author: "Romain Lorrilliere\\thanks{\\href{mailto:romain.lorrilliere@mnhn.fr}{\\
   Pierre-Yves Henry\\thanks{\\href{mailto:pierre-yves.henry@mnhn.fr}{\\textit{pierre-yves.henry@mnhn.fr}}}
   135,75005 Paris \\newline \\url{https://crbpo.mnhn.fr/}}"
 params:
-  set_rep: "C:/git/STOC/STOC_reporting-master/"
+  set_rep: "C:/git/STOC_reporting-master/"
   set_file_data: data_DB/data3session.csv
   set_fileLog: null
   set_site: '204'
@@ -373,7 +373,7 @@ niveau de la communauté d'espèce.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=0.75\linewidth]{C:/git/STOC/STOC_reporting-master/library/fig_ref.png}
+\includegraphics[width=0.75\linewidth]{C:/git/STOC_reporting-master/library/fig_ref.png}
 \end{center}
 \caption[Aide à l'interprétation des figures]{\label{fig:ref}Aide à l'interprétation
  des figures des indicateurs au regard des variations temporelles nationales}
