@@ -8,46 +8,44 @@
     ## likelihood
     n0[i] ~ dbin(p[i], nt[i])
     
-    p[i] <- asig[an[i],sp[i]]/(1+exp((csig[an[i],sp[i]]-date[i])/dsig[an[i],sp[i]]))
+    p[i] <- asig[an_sp_n[i]]/(1+exp((csig[an_sp_n[i]]-date[i])/dsig[an_sp_n[i]]))
   
   }
 
 
   # loop on year and species
 
-  for (y in 1:N_an){
+  for (ii in 1:N_an_sp_n){
     
-    for (sp in 1:N_sp){
 
   # csig parameter
   
-    csig[y,sp] ~ dnorm(mu[y,sp], tau_res_csig)
+    csig[ii] ~ dnorm(mu[ii], tau_res_csig[sp2[ii]]) 
 
-    mu[y,sp] <- c[y,sp] + random_csig_site[site[y]]  
+    mu[ii] <- c[ii] + random_csig_site[site[ii]]  
 
     
   # scale parameter
   
-    dsig[y,sp] ~ dnorm(mu_dsig[y,sp], tau_res_dsig)
+    dsig[ii] ~ dnorm(mu_dsig[ii], tau_res_dsig[sp2[ii]])
     
-    mu_dsig[y,sp] <- d[y,sp] + random_dsig_site[site[y]]
+    mu_dsig[ii] <- d[ii] + random_dsig_site[site[ii]]
 
 
   # asymptote parameter  
   
-    asig[y,sp] ~ dnorm(mu_asig[y,sp], tau_res_asig)T(0.3,1)
+    asig[ii] ~ dnorm(mu_asig[ii], tau_res_asig[sp2[ii]])T(0.3,1)
     
-    mu_asig[y,sp] <- a[y,sp] + random_asig_site[site[y]]
+    mu_asig[ii] <- a[ii] + random_asig_site[site[ii]]
     
-    
-    c[y,sp] ~ dnorm(150,0.01)
+     
+  c[ii] ~ dnorm(150,0.01)
 
-    a[y,sp] ~ dnorm(0,0.01)T(0,1)
+  a[ii] ~ dnorm(0,0.01)T(0,1)
 
-    d[y,sp] ~ dnorm(0,0.01)T(0,10)
+  d[ii] ~ dnorm(0,0.01)T(0,10)
     
-    }
-   
+    
   }
   
 
@@ -55,30 +53,37 @@
   
   for(z in 1:N_site){ #number of sites
  
-  # random year (per sp) effect
+  # random site 
     random_csig_site[z] ~ dnorm(0, tau_csig_site)
     random_asig_site[z] ~ dnorm(0, tau_asig_site)
     random_dsig_site[z] ~ dnorm(0, tau_dsig_site)
+    
   }
   
-  sigma_res_csig ~ dt(0, 0.01, 1)T(0,200) # Residual standard deviation
-  sigma_res_dsig ~ dt(0, 0.01, 1)T(0,10) # Residual standard deviation
-  sigma_res_asig ~ dt(0, 0.01, 1)T(0,1) # Residual standard deviation
+  for(s in 1:N_sp){ # for  variance estimation (per species)
   
-  tau_res_csig <- 1/(sigma_res_csig*sigma_res_csig)
-  tau_res_dsig <- 1/(sigma_res_dsig*sigma_res_dsig)
-  tau_res_asig <- 1/(sigma_res_asig*sigma_res_asig)
+    sigma_res_csig[s] ~ dt(0, 0.01, 1)T(0,200) # Residual standard deviation
+    sigma_res_dsig[s] ~ dt(0, 0.01, 1)T(0,10) # Residual standard deviation
+    sigma_res_asig[s] ~ dt(0, 0.01, 1)T(0,1) # Residual standard deviation
+  
+    tau_res_csig[s] <- 1/(sigma_res_csig[s]*sigma_res_csig[s])
+    tau_res_dsig[s] <- 1/(sigma_res_dsig[s]*sigma_res_dsig[s])
+    tau_res_asig[s] <- 1/(sigma_res_asig[s]*sigma_res_asig[s])
+  
+  }
   
   # csig site
-  sigma_csig_site ~ dt(0, 0.01, 1)T(0,1)
-  tau_csig_site <- pow(sigma_csig_site, -2)
+    sigma_csig_site ~ dt(0, 0.01, 1)T(0,1)
+    tau_csig_site <- pow(sigma_csig_site, -2)
 
   # dsig site
-  sigma_dsig_site ~ dt(0, 0.01, 1)T(0,20)
-  tau_dsig_site <- pow(sigma_dsig_site, -2)
+    sigma_dsig_site ~ dt(0, 0.01, 1)T(0,20)
+    tau_dsig_site <- pow(sigma_dsig_site, -2)
 
   # asig site
-  sigma_asig_site ~ dt(0, 0.01, 1)T(0,1)
-  tau_asig_site <- pow(sigma_asig_site, -2)
+    sigma_asig_site ~ dt(0, 0.01, 1)T(0,1)
+    tau_asig_site <- pow(sigma_asig_site, -2)
+  
+  
 
 }
