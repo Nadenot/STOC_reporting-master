@@ -124,14 +124,14 @@ import <- function(file="extrait.txt",lastYear=NULL,
                          "ESPECE","SP","SEXE","CS","AGE","DEPT","LOCALITE",
                          "LIEUDIT","LP","MA","THEME.SESSION","THEME","BAGUEUR","BG",
                          "COND.REPR","CIRC.REPR","NF","PC","PI","ID_PROG","NEW.ID_PROG","FS","HS","DS","cId_Data","LON","LAT",
-                         "PRECISION_LOC","ALTITUDE","COMMUNES","REGION","BIOGEO")
+                         "PRECISION_LOC","ALTITUDE","COMMUNES")
 
     d$NEW.ID_PROG <- NA
     d$PRECISION_LOC <- NA
     d$ALTITUDE <- NA
     d$COMMUNES <- NA
-    d$REGION <- NA
-    d$BIOGEO <- NA
+    # d$REGION <- NA
+    # d$BIOGEO <- NA
 
   ### fixing strange error in ACTION field (due to encoding)
     catlog(c("\n====================================\n\n - Checking et correction: ACTION field character encoding\n------------------------------------\n"),fileLog)
@@ -493,7 +493,7 @@ import <- function(file="extrait.txt",lastYear=NULL,
 
 
 
-    newCol <- c("PRECISION_LOC","ALTITUDE","COMMUNES","REGION","BIOGEO")
+    newCol <- c("PRECISION_LOC","ALTITUDE","COMMUNES")
 
     d <- subset(d,select=setdiff(selectedColumns,newCol))
 
@@ -1276,7 +1276,12 @@ import <- function(file="extrait.txt",lastYear=NULL,
     d$FS.OUTPUT <- ifelse(d$YEAR<=2010,"deduit",ifelse(is.na(d$FS),"deduit","FS"))
     d$FS <- ifelse(d$YEAR<=2010,d$FS.DEDUIT,ifelse(is.na(d$FS),d$FS.DEDUIT,d$FS))
 
+    
+    #On assigne les régions une fois ceci fait
+    catlog(c("\n====================================\n\n - Assigning BIOGEO regions \n------------------------------------\n"),fileLog)
+    d<-assignRegion(d)
 
+    
     write.table(d,paste("data_DB/",fileDataClean,sep=""),sep="\t",dec=".",row.names=FALSE,na="",quote=TRUE)
     catlog(paste("\n====================================\n\nDATA exported :data_DB/",fileDataClean,"\n",sep=""),fileLog)
     catlog(c("\n\n    => Final number of lines: ",nrow(d),"\n"),fileLog)
@@ -1308,7 +1313,7 @@ select3sessions <- function(d,fileDataClean="data3session.csv",fileLog="log.txt"
                          "LIEUDIT","LP","MA","THEME.SESSION","THEME","BAGUEUR","BG",
                          "COND.REPR","CIRC.REPR","NF","PC","PI","ID_PROG","NEW.ID_PROG",
                          "FS","HS","DS","cId_Data","LON","LAT",
-                         "PRECISION_LOC","ALTITUDE","COMMUNES","REGION","BIOGEO")
+                         "PRECISION_LOC","ALTITUDE","COMMUNES")
 
 
 ### new column NB.SESSION of number of session during the year per place
@@ -1326,11 +1331,11 @@ select3sessions <- function(d,fileDataClean="data3session.csv",fileLog="log.txt"
 
     d <- merge(d,t.nbSession,by=c("NEW.ID_PROG","YEAR"),all.x = TRUE)
 
-    altitude <- unique(subset(d,select=c("NEW.ID_PROG","ALTITUDE","BIOGEO")))
-    altitude$BIOGEO[is.na(altitude$BIOGEO)] <- ""
-    rownames(altitude) <- altitude$NEW.ID_PROG
-    altitude$ALTITUDE[is.na(altitude$ALTITUDE)] <- 0
-    altitude$BIOGEO <- as.character(altitude$BIOGEO)
+    # altitude <- unique(subset(d,select=c("NEW.ID_PROG","ALTITUDE","BIOGEO")))
+    # altitude$BIOGEO[is.na(altitude$BIOGEO)] <- ""
+    # rownames(altitude) <- altitude$NEW.ID_PROG
+    # altitude$ALTITUDE[is.na(altitude$ALTITUDE)] <- 0
+    # altitude$BIOGEO <- as.character(altitude$BIOGEO)
 
     catlog(c("\n - Selection des donnees issue d annee avec au moins 3 sessions dans un programme: \n"),fileLog)
 
@@ -1440,8 +1445,8 @@ select3sessions <- function(d,fileDataClean="data3session.csv",fileLog="log.txt"
             ## si pas d annee a 3 sessions on utilise les dates de references nationales
             tDateRef[ss,] <- dateRefDefaut
 
-            if(ss %in% rownames(altitude)) # decalage des date pour les station mediteraneennne et d altitude
-                if(altitude[ss,"ALTITUDE"]>=800 | altitude[ss,"BIOGEO"]=="mediterraneen"| altitude[ss,"BIOGEO"]=="alpin") tDateRef[ss,] <- tDateRef[ss,] + 15
+            # if(ss %in% rownames(altitude)) # decalage des date pour les station mediteraneennne et d altitude
+            #     if(altitude[ss,"ALTITUDE"]>=800 | altitude[ss,"BIOGEO"]=="mediterraneen"| altitude[ss,"BIOGEO"]=="alpin") tDateRef[ss,] <- tDateRef[ss,] + 15
         }
 
     }
@@ -1467,8 +1472,8 @@ cat("\n")
         mJulian <- matrix(session4.conserve.ss$JULIANDAY,ncol=4,byrow = TRUE)
         mmJulian <- round(colMeans(mJulian))
         julianRef <- dateRefDefaut
-         if(ss %in% rownames(altitude) )# decalage des date pour les station mediteraneennne et d altitude
-             if(altitude[ss,"ALTITUDE"]>=800 | altitude[ss,"BIOGEO"]=="mediterraneen"| altitude[ss,"BIOGEO"]=="alpin") julianRef <- julianRef + 15
+         # if(ss %in% rownames(altitude) )# decalage des date pour les station mediteraneennne et d altitude
+         #     if(altitude[ss,"ALTITUDE"]>=800 | altitude[ss,"BIOGEO"]=="mediterraneen"| altitude[ss,"BIOGEO"]=="alpin") julianRef <- julianRef + 15
     ## calcul des dates de references pour la station
         opt <- as.matrix(rbind(rbind(mmJulian[1:3], mmJulian[-1]),rbind(mmJulian[c(1,2,4)],mmJulian[c(1,3,4)])))
 
