@@ -116,27 +116,36 @@ mainSTOCreporting <- function(file="Extrait.txt",fileDataClean="data.csv",fileDa
         if(abondanceRelative){
             catlog(c("\nABONDANCE RELATIVE\n"),fileLog)
             speciesRelativeAbund.all(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
+            catlog(c("\nABONDANCE RELATIVE REG\n"),fileLog)
+            speciesRelativeAbund.reg(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
         }
 
         if(variationAbondance) {
             catlog(c("\nVARIATION ABONDANCE\n"),fileLog)
             abundanceYear.all(d,fileLog=fileLog,print.fig=TRUE,save.fig=TRUE,save.data_france=TRUE)
+            catlog(c("\nVARIATION ABONDANCE REG\n"),fileLog)
+            abundanceYear.allreg(d,fileLog=fileLog,print.fig=TRUE,save.fig=TRUE,save.data_france=TRUE)
         }
 
         if(variationAbondanceEspece) {
             catlog(c("\nVARIATION ABONDANCE PAR ESPECE\n"),fileLog)
             abundanceSpeciesYear.all(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
+            catlog(c("\nVARIATION ABONDANCE PAR ESPECE REG\n"),fileLog)
+            abundanceSpeciesYear.reg(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
          }
 
         if(productivite) {
             catlog(c("\nPRODUCTIVITEE\n"),fileLog)
             productivityYear.all(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
+            catlog(c("\nPRODUCTIVITEE REG\n"),fileLog)
+            productivityYear.reg(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
         }
 
         if(productiviteEspece) {
             catlog(c("\nPRODUCTIVITEE PAR ESPECE\n"),fileLog)
             productivityYearSpecies.all(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
-
+            catlog(c("\nPRODUCTIVITEE PAR ESPECE REG\n"),fileLog)
+            productivityYearSpecies.reg(d,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
 
         }
 
@@ -144,13 +153,16 @@ mainSTOCreporting <- function(file="Extrait.txt",fileDataClean="data.csv",fileDa
         if(conditionCorporelle) {
             catlog(c("\nCONDITION CORPORELLE\n"),fileLog)
             bodyCondition.all(d,do.all=TRUE,do.sp=TRUE,seuilAbondanceAnnee=seuilAbondanceAnneeAll,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
+            catlog(c("\nCONDITION CORPORELLE REG\n"),fileLog)
+            bodyCondition.reg(d,do.all=TRUE,do.sp=TRUE,seuilAbondanceAnnee=seuilAbondanceAnneeAll,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
         }
 
 
         if(retour) {
             catlog(c("\nTAUX DE RETOUR\n"),fileLog)
             returnRate.all(d,do.all=TRUE,do.sp=TRUE,seuilAbondanceAnnee=seuilAbondanceAnneeAll,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
-
+            catlog(c("\nTAUX DE RETOUR REG\n"),fileLog)
+            returnRate.reg(d,do.all=TRUE,do.sp=TRUE,seuilAbondanceAnnee=seuilAbondanceAnneeAll,fileLog=fileLog,print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE)
         }
 
 
