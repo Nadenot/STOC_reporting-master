@@ -248,6 +248,117 @@ speciesRelativeAbund.all <- function(d,fileLog=NULL, habitat=NULL,print=TRUE, pr
 
 
 
+#Terrestres régionales
+speciesRelativeAbund.reg <- function(d,fileLog=NULL, region="Atlantique",print=TRUE, print.fig=FALSE,save.fig=TRUE,save.data_france=TRUE) {
+
+    test <- FALSE
+if(test == TRUE) {
+     fileLog=NULL; region="Atlantique";print=TRUE; print.fig=FALSE;save.fig=TRUE;save.data_france=TRUE
+    }
+  require(ggplot2)
+  dsp <- read.csv2("library/sp.csv",stringsAsFactors=FALSE)
+
+  regionDemande <-  region
+  if(is.null(region)) regions <- unique(as.character(d$BIOGEOREF)) else regions <- region
+
+
+
+
+  for(region in regions)
+  {
+    dh <-subset(d,HABITAT == "Terrestre")
+    dh <-subset(d,BIOGEOREF == region)
+
+
+    du.bague <- unique(subset(dh,AGE_first == "AD",select=c("SP","BAGUE","NEW.ID_PROG","YEAR")))
+    tableNbCapt <- data.frame(table(du.bague$SP,du.bague$NEW.ID_PROG,du.bague$YEAR))
+    colnames(tableNbCapt) <- c("SP","NEW.ID_PROG","YEAR","ABUND")
+    du.bagueSite <- unique(subset(dh,select=c("SP","BAGUE","NEW.ID_PROG")))
+    tableNbCaptSite <- data.frame(table(du.bagueSite$SP,du.bagueSite$NEW.ID_PROG))
+    colnames(tableNbCaptSite) <- c("SP","NEW.ID_PROG","ABUND_site")
+
+    du.bagueSite <- unique(subset(dh,select=c("BAGUE","NEW.ID_PROG","YEAR")))
+    tableNbCaptYear <- data.frame(table(du.bagueSite$NEW.ID_PROG,du.bagueSite$YEAR))
+    colnames(tableNbCaptYear) <- c("NEW.ID_PROG","YEAR","capt_site_year")
+
+
+    tableStationYear <- unique(subset(dh,select=c("NEW.ID_PROG","YEAR")))
+    nbStationYear <- data.frame(table(tableStationYear$YEAR))
+    colnames(nbStationYear) <- c("YEAR","NB_STATION")
+    tableNbCapt <- merge(tableNbCapt,tableStationYear)
+
+    tableNbCapt <- merge(tableNbCapt,tableNbCaptSite,by=c("SP","NEW.ID_PROG"))
+    tableNbCapt <- subset(tableNbCapt,ABUND_site>0)
+
+    nbSite_sp <- aggregate(NEW.ID_PROG ~ SP , unique(tableNbCapt[,c("SP","NEW.ID_PROG")]),length)
+    colnames(nbSite_sp)[2] <- "nb_site"
+    nbSite_sp$prop_site <- nbSite_sp$nb_site / length(unique(tableNbCapt$NEW.ID_PROG))
+
+
+    nbSiteCaptYear <- aggregate(ifelse(tableNbCapt$ABUND>0,1,0),by=list(tableNbCapt$SP,tableNbCapt$YEAR),sum)
+    colnames(nbSiteCaptYear) <- c("SP","YEAR","NB_STATION_CAPTURE")
+
+    tableCaptYear <- merge(nbSiteCaptYear,nbStationYear,by=c("YEAR"))
+    tableCaptYear$PROP_STATION_CAPTURE <- tableCaptYear$NB_STATION_CAPTURE / tableCaptYear$NB_STATION
+
+    tableNbCapt <- merge(tableNbCapt,tableNbCaptYear,by=c("NEW.ID_PROG","YEAR"))
+    tableNbCapt <- subset(tableNbCapt,capt_site_year>0)
+
+    ggTableQuant <- aggregate(tableNbCapt$ABUND,by=list(tableNbCapt$SP,tableNbCapt$YEAR),quantile,c(0.025,.25,.5,.75,0.90,0.975))
+
+    ggTable <- data.frame(ggTableQuant[,1:2],ggTableQuant[,3][,1:6])
+    colnames(ggTable) <- c("SP","YEAR","ABUND025","ABUND25","ABUND50","ABUND75","ABUND90","ABUND975")
+    ggTable <- merge(ggTable,tableCaptYear,by=c("SP","YEAR"))
+
+    ggTable$SP <- as.character(ggTable$SP)
+    ggTable <- merge(ggTable,dsp,by="SP")
+
+    ggTable <- aggregate(subset(ggTable, select=-c(SP,YEAR,HABITAT_SP,MIGRATION)),by=list(SP=ggTable$SP),median)
+
+    ggTable$SP <- as.character(ggTable$SP)
+    ggTable <- merge(ggTable,dsp,by="SP")
+    ggTable <- merge(ggTable,nbSite_sp, by ="SP")
+
+
+    if(region==regions[1]) tableSpQuant <- data.frame(BIOGEOREF=region,ggTable) else tableSpQuant <- rbind(tableSpQuant,data.frame(BIOGEOREF=region,ggTable))
+
+    ggTable$SP <- factor(ggTable$SP)
+    ggTable <- subset(ggTable,PROP_STATION_CAPTURE>.2)
+
+    gg <- ggplot(ggTable,aes(x=reorder(SP, (1-ABUND75)),y=ABUND50,fill=HABITAT_SP,colour=HABITAT_SP))
+    gg <- gg +geom_linerange(aes(ymin=ABUND025,ymax=ABUND975))+ geom_crossbar(aes(ymin = ABUND25, ymax = ABUND75), width = 0.5)
+    gg <- gg + theme(axis.text.x  = element_text(angle=90,vjust=.5),legend.position="none")
+    gg <- gg + labs(x="Espèce",y="Nombre d'individus adultes captures\npar station et par an\n(parmi les stations qui capture l'espèce)",title=paste("Capture dans les sites de la région",region))
+    gg <- gg + scale_y_log10(breaks=c(0,1,2,5,10,20,50,100,200,400))#+coord_cartesian(ylim=c(0,50)) # scale_y_continuous(breaks=seq(0,80,10))
+    gg <- gg + scale_fill_manual(breaks=c("Aquatique","Terrestre"),values=c("#077be7","#076d0d"))
+    gg <- gg + scale_colour_manual(breaks=c("Aquatique","Terrestre"),values=c("#05529a","#073e0d"))
+    gg <- gg + theme(text = element_text(size = 22))
+
+
+    if(print.fig) print(gg)
+    #  gg
+    if(save.fig) {
+      ggfile <- paste("output/France/Regions/nbCapture_France",region,".png",sep="")
+      catlog(c("Check",ggfile,":"),fileLog)
+      ppi <- 300
+      ggsave(ggfile,gg,width=13, height=8,dpi=72)
+      catlog(c("DONE \n"),fileLog)
+    }
+
+  }
+
+  if(save.data_france){
+
+    file <- paste0("data_France/quantileEspece_France_reg",regionDemande,".csv")
+    catlog(c("  -> ",file,"\n"),fileLog)
+    write.csv2(tableSpQuant,file,row.names=FALSE)
+  }
+
+}
+
+
+
+
 
 
 
