@@ -105,8 +105,8 @@ bagueur_r <- paste0("Bagueur",ifelse(nbb>1,"s","")," responsable",ifelse(nbb>1,"
 
 ```{r title}
 
-title_r <- paste0("\\Large Indicateurs de fonctionnement des populations d'oiseaux communs\\newline issus du Suivi Temporel des Oiseaux Communs par Capture (STOC-Capture)\\newline Infographie actualisée pour la station ",site," contenant les données du printemps ",year)
-subtitle_r <-  paste0("\\large ",bagueur_r," \\vspace{1cm}")#\\normalsize ",bagueur_r,"\\vspace{1cm}")
+title_r <- paste0("\\vspace{5cm} \\Large Indicateurs de fonctionnement des populations d'oiseaux communs\\newline issus du Suivi Temporel des Oiseaux Communs par Capture (STOC-Capture)\\newline Infographie actualisée pour la station ",site," contenant les données du printemps ",year)
+subtitle_r <-  paste0("\\vspace{5cm} \\large ",bagueur_r," \\vspace{1cm}")#\\normalsize ",bagueur_r,"\\vspace{1cm}")
 
 ```
 
@@ -398,7 +398,7 @@ qui capturent l'espéce). Ainsi la figure __\ref{fig:com}__
 permet d'apprécier les paricularités de la station.
 
 
-```{r fig.com, eval=TRUE,fig.align = 'center', out.width='90%',fig.cap=paste("\\label{fig:com}Nombre d'adulte capturés par espèce sur la station ",site,", les points dégradés du jaune au rouge (correspondant aux années) représentent les données locales, les boîtes à moustaches bleues représentent la distribution nationale de ces captures sur les stations de type ",hab_txt," et qui capturent l'espèce. Le nombre de station qui capture l'espèce est noté entre paranthèse",sep=""),fig.scap="Les espèces capturées"}
+```{r fig.com, eval=TRUE,fig.align = 'center', out.width='90%',fig.cap=paste("\\label{fig:com}Nombre d'adulte capturés par espèce sur la station ",site,", les points dégradés du jaune au rouge (correspondant aux années) représentent les données locales, les boîtes à moustaches bleues représentent la distribution nationale de ces captures sur les stations de type ",hab_txt," et qui capturent l'espèce. Le nombre de stations qui capturent l'espèce est noté entre paranthèses",sep=""),fig.scap="Les espèces capturées"}
 
 d_capt_site <- speciesRelativeAbund.site(d,site=site,col_nomsp = "nom_fr",fileLog=fileLog,print.fig=TRUE,save.fig=FALSE,add_title=FALSE,return_table=TRUE)
 
@@ -473,7 +473,7 @@ if(nrow(d_capt_site_ab) > 0 ) {
 
 ```{r text.absp}
 if(fig_sp) {
-    txt <- paste0("Pour les ",nbsp," espèces (table \\textbf{\\ref{tab:com}})  assez abondantes (plus 5 captures d'adultes) les variations d'abondance sont présentées dans les figures \\textbf{\\ref{fig:absp",sp1,"}}-\\textbf{\\ref{fig:absp",spN,"}}.\n")
+    txt <- paste0("Pour les ",nbsp," espèces (table \\textbf{\\ref{tab:com}})  assez abondantes (plus de 5 captures d'adultes) les variations d'abondance sont présentées dans les figures \\textbf{\\ref{fig:absp",sp1,"}}-\\textbf{\\ref{fig:absp",spN,"}}.\n")
 } else {
     txt <- paste0("Aucune espèce n'est assez abondante (plus de 5 captures d'adultes voir table \\textbf{\\ref{tab:com}})  pour une présentation spécifique des variations d'abondance.\n")
 }
