@@ -3,7 +3,8 @@
 
 #Ici, ce n'est pas tant la région d'appartenance que la région de référence. Il n'y a pas suffisament de données
 #pour les stations aquatiques et alpines : on les compare aux résultats nationaux.
-#d<-read.csv2("data_DB/data.csv",sep="\t")
+
+
 
 
 # Gives the altitude of stations, given their coordinates
@@ -191,7 +192,12 @@ ComptageAtl <- function(d){
 }
 
 
-#d_reg <- assignRegion(d)
-#d_reg <- d_reg %>%
-#  select(-geometry)
-#write.csv(d_reg, file = "C:/git/STOC_reporting-master/library/Regions/d_regbiogeo.csv", row.names = FALSE)
+test <- FALSE
+if(test == TRUE) {
+
+    d<-read.csv2("data_DB/data.csv",sep="\t")
+    d_reg <- assignRegion(d)
+    d_reg <- d_reg %>%
+        select(-geometry)
+    write.csv(d_reg, file = "data_DB/data_reg.csv",row.names = FALSE)
+}
