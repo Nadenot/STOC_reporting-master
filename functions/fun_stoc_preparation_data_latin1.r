@@ -34,12 +34,12 @@ import <- function(file="extrait.txt",lastYear=NULL,
                    seuilAvorteDuree= 3, seuilAvorteEvenement=4,seuilExclusionDelai = 10,dateRefDefaut =c(138,165,188)) {
 
 
-                                   ##        fileLog="log.txt" #####
-                                   ##
-                                   ##        decimalData="." #####
-                                   ##        file = "stoc_20180616.txt" #####
-                                   ##        lastYear = NULL #####
-                                   ##    seuilAvorteDuree= 3; seuilAvorteEvenement=4;seuilExclusionDelai = 10;dateRefDefaut =c(138,165,188) ###
+                                           fileLog="log.txt" #####
+
+                                           decimalData="." #####
+                                           file = "extrait.txt" #####
+                                           lastYear = NULL #####
+                                       seuilAvorteDuree= 3; seuilAvorteEvenement=4;seuilExclusionDelai = 10;dateRefDefaut =c(138,165,188) ###
 
 
     catlog(c("\n====================================\n              Suppression error files if exists\n==================================== \n\n"),fileLog)
@@ -160,7 +160,7 @@ import <- function(file="extrait.txt",lastYear=NULL,
 
                                         # code.action: vector of the possible code for the ACTION field with the good encoding
     code.action <- c("B","C","R")
-    
+
     # ua <- unique(d$ACTION)
     # while(length(ua[!(ua %in% code.action)])>0) {
     #      catlog("\n Il y a des erreurs d'encodage, nous allons corriger ces erreurs",fileLog)
@@ -170,15 +170,15 @@ import <- function(file="extrait.txt",lastYear=NULL,
     #         A <-readline(paste("Taper le code",ua[ia],"en majuscule puis [ENTRER]"))
     #         d$ACTION[d$ACTION == ua[ia]] <- A
     #     }
-    # 
+    #
     #      ua <- unique(d$ACTION)
     # }
-    
+
     # Solution de Romane:
     ## Gestion d'un probleme d'encodage avec code.action = valeurs autorisees pour ACTION. On ne conserve que le dernier caractere des cases d'ACTION.
     code.action <- c("B","C","R","SANS","BREDOUILLE")
     d$ACTION <- ifelse(!(d$ACTION %in% code.action), str_sub(d$ACTION, start = -1), d$ACTION)
-    
+
     catlog(c(" --> OK, probleme d encodage corrige \n"),fileLog)
 
     warning.act <- subset(d,ACTION %nin% code.action)
@@ -1276,12 +1276,12 @@ import <- function(file="extrait.txt",lastYear=NULL,
     d$FS.OUTPUT <- ifelse(d$YEAR<=2010,"deduit",ifelse(is.na(d$FS),"deduit","FS"))
     d$FS <- ifelse(d$YEAR<=2010,d$FS.DEDUIT,ifelse(is.na(d$FS),d$FS.DEDUIT,d$FS))
 
-    
+
     #On assigne les régions une fois ceci fait
     catlog(c("\n====================================\n\n - Assigning BIOGEO regions \n------------------------------------\n"),fileLog)
     d<-assignRegion(d)
 
-    
+
     write.table(d,paste("data_DB/",fileDataClean,sep=""),sep="\t",dec=".",row.names=FALSE,na="",quote=TRUE)
     catlog(paste("\n====================================\n\nDATA exported :data_DB/",fileDataClean,"\n",sep=""),fileLog)
     catlog(c("\n\n    => Final number of lines: ",nrow(d),"\n"),fileLog)
