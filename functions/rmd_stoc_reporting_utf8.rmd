@@ -295,10 +295,10 @@ noté dans la table __\ref{tab:fs}__.
 
 ```{r tab.fs, eval= TRUE, result ='asis'}
 
-d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS","FS.OUTPUT")))
+d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS","FS.METHODE")))
 d_session <- d_session[order(d_session$YEAR,d_session$SESSION),]
-d_session$FS.OUTPUT <- ifelse(d_session$FS.OUTPUT == "FS","renseigné","déduit")
-colnames(d_session) <- c("Année","Session","Date","Longueur de filets (m)","Renseigné/Déduit")
+##d_session$FS.OUTPUT <- ifelse(d_session$FS.OUTPUT == "FS","renseigné","déduit")
+colnames(d_session) <- c("Année","Session","Date","Longueur de filets (m)","Méthode")
 
 
 kable(d_session,"latex", caption=paste0("Les longueurs de filets lors des session de capture sur le site ",site,"."),label="fs",row.names=FALSE,booktabs=TRUE)
