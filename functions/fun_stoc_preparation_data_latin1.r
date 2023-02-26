@@ -1152,134 +1152,135 @@ import <- function(file="extrait.txt",lastYear=NULL,
 ### curious ID number of mist nets
     catlog(c("\n====================================\n\n - Estimation de FS.DEDUIT \n------------------------------------\n"),fileLog)
 
+    d <- f_fs(d)
 
-    catlog(c(" -> Adding new columns\n"),fileLog)
-    catlog(c("    --> NB.NF mist net number assessed in data\n"),fileLog)
-    du.nf <- unique(subset(d,select=c("NEW.ID_PROG","NF")))
-    t.contingency.nf <-as.data.frame(table(du.nf$NEW.ID_PROG))
-    colnames(t.contingency.nf) <- c("NEW.ID_PROG","NB.NF")
-    d <- merge(d,t.contingency.nf,by=c("NEW.ID_PROG"))
-    catlog(c("    --> FS.DEDUIT mist net length assessed in data\n"),fileLog)
-    d$FS.DEDUIT <- d$NB.NF * 12
-    d$FS.DEDUIT <- ifelse(d$HABITAT == "STOC-rozo",120,d$FS.DEDUIT)
-
-    d$FS <- as.numeric(as.character(d$FS))
-
-    catlog(c("\n====================================\n\n - Checking: FS \n------------------------------------\n"),fileLog)
-
-
-    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","DATE","FS","FS.DEDUIT"))
-
-    dnf <- na.omit(dnf)
-    dnf <- unique(dnf)
-    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
-
-    dnf.error <- dnf[which((dnf$FS<120 & dnf$DIFF >=36)|dnf$FS>500),]
-    lnferror <- nrow(dnf.error)
-    if(lnferror>0){
-                                        #      for(i in 1:lnferror)
-                                        #          if(i == 1) d.warning.nf <- d[d$NEW.ID_PROG == dnf.error$NEW.ID_PROG[i] & d$YEAR == dnf.error$YEAR[i] & d$FS == dnf.error$FS[i],] else d.warning.nf <- rbind(d.warning.nf,d[d$NEW.ID_PROG == dnf.error$NEW.ID_PROG[i] & d$YEAR == dnf.error$YEAR[i] & d$FS == dnf.error$FS[i],])
-
-        d.warning.nf <- d[which(paste(d$NEW.ID_PROG,d$DATE) %in% paste(dnf.error$NEW.ID_PROG,dnf.error$DATE)),]
-        d.warning.nf <- data.frame(error = "FS ERROR",commmentError=paste("FS.DEDUIT =",d.warning.nf$FS.DEDUIT),suppression= "Value",subset(d.warning.nf,select=selectedColumns))
-
-
-
-        catlog(c(" !!! WARNING MESSAGE:",lnferror," value of FS are certainly errors\n",
-            "These data are replaced by NA \n ==> ",
-            "Check warning_FS_ERROR.csv in output_preparation/ dirctory !!\n",
-            "This corresponds to",nrow(d.warning.nf),"lines in the database\n",
-            "Check WARNING_DATA.csv in output_preparation/ dirctory  error category : 'FS ERROR'!!\n\n"),fileLog)
-
-        write.csv2(dnf.error,"output_preparation/warning_FS_error.csv",
-                   row.names=FALSE,na="",quote=FALSE)
-
-        if (file.exists("output_preparation/WARNING_DATA.csv"))
-            write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
-                        row.names=FALSE,sep=";",quote=FALSE,append=TRUE,
-                        col.names=FALSE) else
-                                             write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
-                                                         row.names=FALSE,sep=";",quote=FALSE,append=FALSE)
-
-
-
-        d[d$cId_Data %in% d.warning.nf$cId_Data,"FS"] <- NA
-    }
-
-    ## netoyage +  message erreur + sortie erreur
-    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","DATE","FS","FS.DEDUIT"))
-    dnf <- na.omit(dnf)
-    dnf <- unique(dnf)
-    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
-    dnf.strange <- dnf[abs(dnf$DIFF)>=36,]
-    ## avertissement + sortie avertissement
-
-    lnferror <- nrow(dnf.strange)
-    if(lnferror>0){
-
-        d.warning.nf <- d[which(paste(d$NEW.ID_PROG,d$DATE) %in% paste(dnf.strange$NEW.ID_PROG,dnf.strange$DATE)),]
-
-                                        #     for(i in 1:lnferror)
-                                        #         if(i == 1) d.warning.nf <- d[d$NEW.ID_PROG == dnf.strange$NEW.ID_PROG[i] & d$YEAR == dnf.strange$YEAR[i] & d$FS == dnf.strange$FS[i],] else d.warning.nf <- rbind(d.warning.nf,d[d$NEW.ID_PROG == dnf.strange$NEW.ID_PROG[i] & d$YEAR == dnf.strange$YEAR[i] & d$FS == dnf.strange$FS[i],])
-
-        d.warning.nf <- data.frame(error ="FS STRANGE",commmentError=paste("FS.DEDUIT =",d.warning.nf$FS.DEDUIT),suppression= "No",subset(d.warning.nf,select=selectedColumns))
-
-
-        catlog(c(" !!! WARNING MESSAGE:",lnferror," value of FS are strange because very lower than FS.DEDUIT\n",
-            "These data are not replaced \n ==> ",
-            "Check warning_FS_STRANGE.csv in output_preparation/ dirctory !!\n",
-            "This corresponds to",nrow(d.warning.nf),"lines in the database\n",
-            "Check WARNING_DATA.csv in output_preparation/ dirctory  error category : 'FS STRANGE'!!\n"),fileLog)
-
-        write.csv2(dnf.strange,"output_preparation/warning_FS_strange.csv",
-                   row.names=FALSE,na="",quote=FALSE)
-
-
-        if (file.exists("output_preparation/WARNING_DATA.csv"))
-            write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
-                        row.names=FALSE,sep=";",quote=FALSE,append=TRUE,
-                        col.names=FALSE) else
-                                             write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
-                                                         row.names=FALSE,sep=";",quote=FALSE,append=FALSE)
-
-
-    }
-
-    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","FS","FS.DEDUIT","HABITAT"))
-    dnf <- na.omit(dnf)
-    dnf <- unique(dnf)
-    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
-
-    m <- lm(FS.DEDUIT ~ FS, dnf)
-    a = format(coef(m)[1], digits = 2)
-    b = format(coef(m)[2], digits = 2)
-    r = format(summary(m)$r.squared, digits = 3)
-    text.equa <- paste("FS.DEDUIT = ",a," + ",b," FS\nr^2 = ",r,sep="")
-
-    ggnf1 <- ggplot(dnf,aes(x=FS,y=FS.DEDUIT,colour=as.factor(YEAR)))+geom_abline(slope=1,intercept = 0,colour="gray")+ coord_fixed(xlim=c(0,400),ylim=c(0,400),ratio=1)
-    ggnf1 <- ggnf1 + geom_smooth(method="lm",colour="red")+ annotate("text", label = text.equa,x=80,y=400,size=3,colour="red")+ geom_point()
-    ggnf1 <- ggnf1 + labs(list(title="Estimation de FS a partir des toutes les données",colour="Années"))
-
-    ggfile <- paste("output_preparation/estimationFS_all.png",sep="")
-    catlog(c("Check",ggfile,":"),fileLog)
-    ggsave(ggfile,ggnf1)
-    catlog(c("\n"),fileLog)
-
-
-    ggnf2 <- ggplot(dnf,aes(x=DIFF)) + geom_histogram(binwidth = 12) + labs(list(title="Distribution de FS.DEDUIT - FS pour toute les données",x="FS.DEDUIT - FS"))
-
-    ggfile <- paste("output_preparation/estimationFS_histograme_all.png",sep="")
-    catlog(c("Check",ggfile,":"),fileLog)
-    ggsave(ggfile,ggnf2)
-    catlog(c("\n"),fileLog)
-
-    d$FS.OUTPUT <- ifelse(d$YEAR<=2010,"deduit",ifelse(is.na(d$FS),"deduit","FS"))
-    d$FS <- ifelse(d$YEAR<=2010,d$FS.DEDUIT,ifelse(is.na(d$FS),d$FS.DEDUIT,d$FS))
-
-
+##    catlog(c(" -> Adding new columns\n"),fileLog)
+##    catlog(c("    --> NB.NF mist net number assessed in data\n"),fileLog)
+##    du.nf <- unique(subset(d,select=c("NEW.ID_PROG","NF")))
+##    t.contingency.nf <-as.data.frame(table(du.nf$NEW.ID_PROG))
+##    colnames(t.contingency.nf) <- c("NEW.ID_PROG","NB.NF")
+##    d <- merge(d,t.contingency.nf,by=c("NEW.ID_PROG"))
+##    catlog(c("    --> FS.DEDUIT mist net length assessed in data\n"),fileLog)
+##    d$FS.DEDUIT <- d$NB.NF * 12
+##    d$FS.DEDUIT <- ifelse(d$HABITAT == "STOC-rozo",120,d$FS.DEDUIT)
+##
+##    d$FS <- as.numeric(as.character(d$FS))
+##
+##    catlog(c("\n====================================\n\n - Checking: FS \n------------------------------------\n"),fileLog)
+##
+##
+##    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","DATE","FS","FS.DEDUIT"))
+##
+##    dnf <- na.omit(dnf)
+##    dnf <- unique(dnf)
+##    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
+##
+##    dnf.error <- dnf[which((dnf$FS<120 & dnf$DIFF >=36)|dnf$FS>500),]
+##    lnferror <- nrow(dnf.error)
+##    if(lnferror>0){
+##                                        #      for(i in 1:lnferror)
+##                                        #          if(i == 1) d.warning.nf <- d[d$NEW.ID_PROG == dnf.error$NEW.ID_PROG[i] & d$YEAR == dnf.error$YEAR[i] & d$FS == dnf.error$FS[i],] else d.warning.nf <- rbind(d.warning.nf,d[d$NEW.ID_PROG == dnf.error$NEW.ID_PROG[i] & d$YEAR == dnf.error$YEAR[i] & d$FS == dnf.error$FS[i],])
+##
+##        d.warning.nf <- d[which(paste(d$NEW.ID_PROG,d$DATE) %in% paste(dnf.error$NEW.ID_PROG,dnf.error$DATE)),]
+##        d.warning.nf <- data.frame(error = "FS ERROR",commmentError=paste("FS.DEDUIT =",d.warning.nf$FS.DEDUIT),suppression= "Value",subset(d.warning.nf,select=selectedColumns))
+##
+##
+##
+##        catlog(c(" !!! WARNING MESSAGE:",lnferror," value of FS are certainly errors\n",
+##            "These data are replaced by NA \n ==> ",
+##            "Check warning_FS_ERROR.csv in output_preparation/ dirctory !!\n",
+##            "This corresponds to",nrow(d.warning.nf),"lines in the database\n",
+##            "Check WARNING_DATA.csv in output_preparation/ dirctory  error category : 'FS ERROR'!!\n\n"),fileLog)
+##
+##        write.csv2(dnf.error,"output_preparation/warning_FS_error.csv",
+##                   row.names=FALSE,na="",quote=FALSE)
+##
+##        if (file.exists("output_preparation/WARNING_DATA.csv"))
+##            write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
+##                        row.names=FALSE,sep=";",quote=FALSE,append=TRUE,
+##                        col.names=FALSE) else
+##                                             write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
+##                                                         row.names=FALSE,sep=";",quote=FALSE,append=FALSE)
+##
+##
+##
+##        d[d$cId_Data %in% d.warning.nf$cId_Data,"FS"] <- NA
+##    }
+##
+##    ## netoyage +  message erreur + sortie erreur
+##    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","DATE","FS","FS.DEDUIT"))
+##    dnf <- na.omit(dnf)
+##    dnf <- unique(dnf)
+##    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
+##    dnf.strange <- dnf[abs(dnf$DIFF)>=36,]
+##    ## avertissement + sortie avertissement
+##
+##    lnferror <- nrow(dnf.strange)
+##    if(lnferror>0){
+##
+##        d.warning.nf <- d[which(paste(d$NEW.ID_PROG,d$DATE) %in% paste(dnf.strange$NEW.ID_PROG,dnf.strange$DATE)),]
+##
+##                                        #     for(i in 1:lnferror)
+##                                        #         if(i == 1) d.warning.nf <- d[d$NEW.ID_PROG == dnf.strange$NEW.ID_PROG[i] & d$YEAR == dnf.strange$YEAR[i] & d$FS == dnf.strange$FS[i],] else d.warning.nf <- rbind(d.warning.nf,d[d$NEW.ID_PROG == dnf.strange$NEW.ID_PROG[i] & d$YEAR == dnf.strange$YEAR[i] & d$FS == dnf.strange$FS[i],])
+##
+##        d.warning.nf <- data.frame(error ="FS STRANGE",commmentError=paste("FS.DEDUIT =",d.warning.nf$FS.DEDUIT),suppression= "No",subset(d.warning.nf,select=selectedColumns))
+##
+##
+##        catlog(c(" !!! WARNING MESSAGE:",lnferror," value of FS are strange because very lower than FS.DEDUIT\n",
+##            "These data are not replaced \n ==> ",
+##            "Check warning_FS_STRANGE.csv in output_preparation/ dirctory !!\n",
+##            "This corresponds to",nrow(d.warning.nf),"lines in the database\n",
+##            "Check WARNING_DATA.csv in output_preparation/ dirctory  error category : 'FS STRANGE'!!\n"),fileLog)
+##
+##        write.csv2(dnf.strange,"output_preparation/warning_FS_strange.csv",
+##                   row.names=FALSE,na="",quote=FALSE)
+##
+##
+##        if (file.exists("output_preparation/WARNING_DATA.csv"))
+##            write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
+##                        row.names=FALSE,sep=";",quote=FALSE,append=TRUE,
+##                        col.names=FALSE) else
+##                                             write.table(d.warning.nf,"output_preparation/WARNING_DATA.csv",
+##                                                         row.names=FALSE,sep=";",quote=FALSE,append=FALSE)
+##
+##
+##    }
+##
+##    dnf <- subset(d,select=c("NEW.ID_PROG","YEAR","FS","FS.DEDUIT","HABITAT"))
+##    dnf <- na.omit(dnf)
+##    dnf <- unique(dnf)
+##    dnf$DIFF <- dnf$FS.DEDUIT - dnf$FS
+##
+##    m <- lm(FS.DEDUIT ~ FS, dnf)
+##    a = format(coef(m)[1], digits = 2)
+##    b = format(coef(m)[2], digits = 2)
+##    r = format(summary(m)$r.squared, digits = 3)
+##    text.equa <- paste("FS.DEDUIT = ",a," + ",b," FS\nr^2 = ",r,sep="")
+##
+##    ggnf1 <- ggplot(dnf,aes(x=FS,y=FS.DEDUIT,colour=as.factor(YEAR)))+geom_abline(slope=1,intercept = 0,colour="gray")+ coord_fixed(xlim=c(0,400),ylim=c(0,400),ratio=1)
+##    ggnf1 <- ggnf1 + geom_smooth(method="lm",colour="red")+ annotate("text", label = text.equa,x=80,y=400,size=3,colour="red")+ geom_point()
+##    ggnf1 <- ggnf1 + labs(list(title="Estimation de FS a partir des toutes les données",colour="Années"))
+##
+##    ggfile <- paste("output_preparation/estimationFS_all.png",sep="")
+##    catlog(c("Check",ggfile,":"),fileLog)
+##    ggsave(ggfile,ggnf1)
+##    catlog(c("\n"),fileLog)
+##
+##
+##    ggnf2 <- ggplot(dnf,aes(x=DIFF)) + geom_histogram(binwidth = 12) + labs(list(title="Distribution de FS.DEDUIT - FS pour toute les données",x="FS.DEDUIT - FS"))
+##
+##    ggfile <- paste("output_preparation/estimationFS_histograme_all.png",sep="")
+##    catlog(c("Check",ggfile,":"),fileLog)
+##    ggsave(ggfile,ggnf2)
+##    catlog(c("\n"),fileLog)
+##
+##    d$FS.OUTPUT <- ifelse(d$YEAR<=2010,"deduit",ifelse(is.na(d$FS),"deduit","FS"))
+##    d$FS <- ifelse(d$YEAR<=2010,d$FS.DEDUIT,ifelse(is.na(d$FS),d$FS.DEDUIT,d$FS))
+##
+##
     #On assigne les régions une fois ceci fait
     catlog(c("\n====================================\n\n - Assigning BIOGEO regions \n------------------------------------\n"),fileLog)
-    d<-assignRegion(d)
+    d <- assignRegion(d)
 
 
     write.table(d,paste("data_DB/",fileDataClean,sep=""),sep="\t",dec=".",row.names=FALSE,na="",quote=TRUE)
