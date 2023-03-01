@@ -66,8 +66,30 @@ d <- d %>% mutate_if(is.character, Encoding_utf8)
 
 #d <- subset(d,NEW.ID_PROG == site)
 hab <- d[1,"HABITAT"]
-
+reg <- d[1,"BIOGEO"]
 hab_txt <- tolower(hab)
+
+reg<-tolower(reg)
+
+if(hab=="terrestre"){
+  couleur<-"vert"
+}
+if(hab=="aquatique"){
+  couleur<-"bleu"
+}
+
+if(reg=="National"){
+  hab_txt <- paste(hab," de toute la France")
+  reg_txt<-reg
+}
+if(reg!="National"){
+  hab_txt <- paste(hab," de la region '",reg,"'")
+  reg_txt<-reg
+  # if(hab=="Terrestre"){
+  #   reg_txt<-"alpine"
+  # }
+}
+
 
 ## ajout des nom français d'espèces
 
@@ -194,6 +216,12 @@ comparées aux autres stations du même groupe:
   des oiseaux paludicoles 
 - Rozo : Stations réalisant le protocole spécifique STOC-ROZO
 
+Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
+Les stations atlantiques terrestres (altantique au sens large, regroupant les régions biogéographiques "Atlantique central" et "Atlantique lusitanien"), sont comparées à l'ensemble des stations atlantiques terrestres.
+
+
+Ici, la station `r site` est dans la région `r reg_txt`. 
+
 
 Ainsi la station `r site` de type `r hab_txt` est comparée au sous-ensemble des stations
 STOC-Capture du type `r hab_txt` et qui ont été en activité en même
@@ -201,9 +229,10 @@ temps (figure __\ref{fig:carte}__).
 
 
 
-```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site,"en rouge et des stations de même type en dégradé de bleu présentant le nombre d'année de données disponibles pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisables pour caractériser la référence nationale"),fig.scap="La localisation de la station"} 
+```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site,"en jaune et des stations avec lequelles elle est comparée en ",couleur,". Les stations représentées par un petit point rouge  sont les autres stations, d'habitat ou de région différente"),fig.scap="La localisation de la station"}
 
-carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
+# carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
+carteSites(d=d,site=site,print.fig=TRUE,save.fig=save.fig)
  
 ```
 
@@ -432,7 +461,7 @@ kable(table_capt,"latex", caption=paste0("Les espèces capturée sur le site ",s
 
 \clearpage
 
-## L'indice d'abondance des adultes
+## L'indice d'abondance des adultes comparé par habitat et région
 Les variations locales d'abondance quantifient la
 résultante démographique (tailles de population) des effets combinés
 des variations de survie, de reproduction et de dispersion entre
