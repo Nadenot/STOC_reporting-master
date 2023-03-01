@@ -32,7 +32,7 @@ rep <- params$set_rep
 file_data <- params$set_file_data
 fileLog <- params$set_fileLog
 site <- params$set_site
-year <- params$set_year
+year <- params$set_year -1
 save.fig <- params$set_save_fig
 
 ```
@@ -80,8 +80,8 @@ d <- left_join(d,dsp)
 
 ```{r bagueur}
 
-bagueur <- sort(unique(subset(d,NEW.ID_PROG == site)$BAGUEUR))
-bg <- sort(setdiff(unique(subset(d,NEW.ID_PROG == site)$BG),bagueur))
+bagueur <- sort(unique(subset(d,NEW.ID_PROG == site & BAGUEUR != "")$BAGUEUR))
+bg <- sort(setdiff(unique(subset(d,NEW.ID_PROG == site  & BAGUEUR != "")$BG),bagueur))
 nbb <- length(bagueur)
 prenom <- word(bagueur,2,sep=", ")
 nom <- str_to_title(word(bagueur,1,sep=", "))
@@ -105,8 +105,8 @@ bagueur_r <- paste0("Bagueur",ifelse(nbb>1,"s","")," responsable",ifelse(nbb>1,"
 
 ```{r title}
 
-title_r <- paste0("\\vspace{5cm} \\Large Indicateurs de fonctionnement des populations d'oiseaux communs\\newline issus du Suivi Temporel des Oiseaux Communs par Capture (STOC-Capture)\\newline Infographie actualisée pour la station ",site," contenant les données du printemps ",year)
-subtitle_r <-  paste0("\\vspace{5cm} \\large ",bagueur_r," \\vspace{1cm}")#\\normalsize ",bagueur_r,"\\vspace{1cm}")
+title_r <- paste0(" \\Large Indicateurs de fonctionnement des populations d'oiseaux communs\\newline issus du Suivi Temporel des Oiseaux Communs par Capture (STOC-Capture)\\newline Infographie actualisée pour la station ",site," contenant les données du printemps ",year)
+subtitle_r <-  paste0(" \\large ",bagueur_r," \\vspace{1cm}")#\\normalsize ",bagueur_r,"\\vspace{1cm}")
 
 ```
 
@@ -124,10 +124,12 @@ subtitle: `r subtitle_r`
 \tableofcontents
 \listoffigures 
 
-_Remerciement :_ 
 
-On remercie toutes les personnes qui ont participer au maintient et à l'amélioration du scritp de production de ce rapport, 
- Benboudjema Sophie (Mme) <sophie.benboudjema@polytechnique.edu>
+
+
+_Remerciements :_ 
+
+On remercie toutes les personnes qui ont participé au maintien et à l'amélioration du script de production de ce rapport, Adenot Nathalie, Auvray Coraline, Benboudjema Sophie, Blandin Gwenalan, Della Signora Carla, Fort Romane, Magliaraschi Ninon.
  
  
 \clearpage
@@ -302,7 +304,7 @@ noté dans la table __\ref{tab:fs}__.
 
 ```{r tab.fs, eval= TRUE, result ='asis'}
 
-d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS.DEDUIT","FS.METHODE")))
+d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS.DEDUIT","FS_METHODE")))
 d_session <- d_session[order(d_session$YEAR,d_session$SESSION),]
 ##d_session$FS.OUTPUT <- ifelse(d_session$FS.OUTPUT == "FS","renseigné","déduit")
 colnames(d_session) <- c("Année","Session","Date","Longueur de filets (m)","Méthode")
