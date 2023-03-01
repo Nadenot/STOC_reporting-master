@@ -13,7 +13,7 @@ params:
   set_rep: "C:/git/STOC_reporting-master/"
   set_file_data: data_DB/data3session.csv
   set_fileLog: null
-  set_site: '204'
+  set_site: '7'
   set_year: 2015
   set_save_fig: no
 output: pdf_document
@@ -123,6 +123,13 @@ subtitle: `r subtitle_r`
 
 \tableofcontents
 \listoffigures 
+
+_Remerciement :_ 
+
+On remercie toutes les personnes qui ont participer au maintient et à l'amélioration du scritp de production de ce rapport, 
+ Benboudjema Sophie (Mme) <sophie.benboudjema@polytechnique.edu>
+ 
+ 
 \clearpage
 
 \newpage
@@ -295,7 +302,7 @@ noté dans la table __\ref{tab:fs}__.
 
 ```{r tab.fs, eval= TRUE, result ='asis'}
 
-d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS","FS.METHODE")))
+d_session <- unique(subset(d,NEW.ID_PROG == site,select=c("YEAR","SESSION","DATE","FS.DEDUIT","FS.METHODE")))
 d_session <- d_session[order(d_session$YEAR,d_session$SESSION),]
 ##d_session$FS.OUTPUT <- ifelse(d_session$FS.OUTPUT == "FS","renseigné","déduit")
 colnames(d_session) <- c("Année","Session","Date","Longueur de filets (m)","Méthode")
