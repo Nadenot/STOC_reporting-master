@@ -411,7 +411,7 @@ abundanceYear.all <- function(d,habitat=NULL,fileLog="log.txt",print.fig=FALSE,s
 
 
 
-    t.fs <- aggregate(FS.DEDUIT~NEW.ID_PROG + YEAR + HABITAT,data= unique(subset(d,select=c("NEW.ID_PROG","HABITAT","YEAR","SESSION","FS.DEDUIT","FS.METHODE"))),sum)
+    t.fs <- aggregate(FS.DEDUIT~NEW.ID_PROG + YEAR + HABITAT,data= unique(subset(d,select=c("NEW.ID_PROG","HABITAT","YEAR","SESSION","FS.DEDUIT","FS_METHODE"))),sum)
 
     if(!is.null(habitat))  t.fs  <- subset( t.fs ,HABITAT == habitat)
 
@@ -509,7 +509,7 @@ abundanceYear.allreg <- function(d,region="Atlantique",fileLog="log.txt",print.f
 
 
 
-  t.fs <- aggregate(FS~NEW.ID_PROG + YEAR + BIOGEOREF,data= unique(subset(dregd,select=c("NEW.ID_PROG","BIOGEOREF","YEAR","SESSION","FS.DEDUIT","FS.METHODE"))),sum)
+  t.fs <- aggregate(FS.DEDUIT~NEW.ID_PROG + YEAR + BIOGEOREF,data= unique(subset(dregd,select=c("NEW.ID_PROG","BIOGEOREF","YEAR","SESSION","FS.DEDUIT","FS_METHODE"))),sum)
 
   if(!is.null(region))  t.fs  <- subset( t.fs ,BIOGEOREF == region)
 
