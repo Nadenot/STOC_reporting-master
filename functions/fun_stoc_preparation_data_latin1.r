@@ -34,12 +34,12 @@ import <- function(file="extrait.txt",lastYear=NULL,
                    seuilAvorteDuree= 3, seuilAvorteEvenement=4,seuilExclusionDelai = 10,dateRefDefaut =c(138,165,188)) {
 
 
-                                           fileLog="log.txt" #####
+                                         ###  fileLog="log.txt" #####
 
-                                           decimalData="." #####
-                                           file = "extrait.txt" #####
-                                           lastYear = NULL #####
-                                       seuilAvorteDuree= 3; seuilAvorteEvenement=4;seuilExclusionDelai = 10;dateRefDefaut =c(138,165,188) ###
+                                         ###  decimalData="." #####
+                                         ###  file = "extrait.txt" #####
+                                        ##   lastYear = NULL #####
+                                    ###   seuilAvorteDuree= 3; seuilAvorteEvenement=4;seuilExclusionDelai = 10;dateRefDefaut =c(138,165,188) ###
 
 
     catlog(c("\n====================================\n              Suppression error files if exists\n==================================== \n\n"),fileLog)
@@ -426,6 +426,7 @@ import <- function(file="extrait.txt",lastYear=NULL,
     dProg$FIRST.YEAR[is.na(dProg$FIRST.YEAR)] <- min(d$YEAR)
 
     dProg$nbYear <- dProg$LAST.YEAR - dProg$FIRST.YEAR + 1
+
     t.idprog <- data.frame(ID_PROG = NULL,YEAR=NULL,NEW.ID_PROG=NULL)
 
     for(i in 1:nrow(dProg)) {
@@ -442,6 +443,26 @@ import <- function(file="extrait.txt",lastYear=NULL,
     d$NEW.ID_PROG <- ifelse(is.na(d$NEW.ID_PROG),as.character(d$ID_PROG),
                             as.character(d$NEW.ID_PROG))
     catlog(c(" !!! WARNING MESSAGE:",length(which(d$NEW.ID_PROG=="XX"))," line(s) deleted\n"),fileLog)
+
+    dstation <- aggregate(YEAR ~ NEW.ID_PROG,data = d, min)
+    colnames(dstation)[2] <- "FIRST.YEAR_DATA"
+
+    col_dProg <- colnames(dProg)
+
+    dProg <- merge(dProg,dstation,by="NEW.ID_PROG")
+    dProg$FIRST.YEAR  <- ifelse(is.na(dProg$FIRST.YEAR),dProg$FIRST.YEAR_DATA, dProg$FIRST.YEAR)
+    dProg <- dProg[,col_dProg]
+
+    require(data.table)
+    setDT(d)
+    dnew <- d[!(ID_PROG %in% dProg$ID_PROG),.(ID_PROG = NEW.ID_PROG,FIRST.YEAR = min(YEAR), LAST.YEAR = max(YEAR),COMMENTS = "",nbYear = max(YEAR) - min(YEAR) + 1),by = NEW.ID_PROG]
+    setDF(dnew)
+    dnew <- dnew[,col_dProg]
+    dProg <- rbind(dProg,dnew)
+    
+    
+    write.csv(dProg,"library/NEW.ID_PROG_YEARS.csv",row.names=FALSE)
+
 
       de <- subset(d,NEW.ID_PROG == "XX")
     if(nrow(de) > 0) {
