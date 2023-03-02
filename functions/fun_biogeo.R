@@ -150,12 +150,16 @@ CarteBiogeoAll <- function(d, print.fig=TRUE, save.fig=TRUE){
 #and compare the rest to the national reference
 
 assignRegion<-function(d){
-
+  require(dplyr)
   d <- RegionsBiogeo(d)
 
   d <- d %>%
     mutate(BIOGEOREF = ifelse(HABITAT == "Terrestre" & (REGBIOGEO == "Atlantique_central" | REGBIOGEO == "Lusitanien"), "Atlantique", "National"))
-
+  d$BIOGEO_HAB <- paste0(d$BIOGEOREF,"_",d$HABITAT)
+  
+  d_biogeo <- unique(d[,c("NEW.ID_PROG","BIOGEOREF","REGBIOGEO","HABITAT","BIOGEO_HAB","ALT","LON", "LAT")])
+  write.csv2(d_biogeo, file = "library/reg_biogeo.csv", row.names = FALSE)
+  
   print("REGIONS ASSIGNEES")
   return(d)
 }
