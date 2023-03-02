@@ -3,105 +3,6 @@
 source("functions/fun_generic_latin1.r")
 
 
-carteTauxAnnuel <- function(d,site=NULL,AD=TRUE,year=NULL,fileLog=NULL,print.fig=TRUE,save.fig=TRUE,add_title=TRUE) {
-
-  require(rgdal)
-  require(ggmap)
-  require(maptools)
-  library(sf)
-  require(maps)
-
-
-  if(!is.null(year)){
-    d<-subset(d,YEAR==year)
-  }
-
-  france <- map_data("france")
-  if(is.null(site)) site <- sort(as.character(unique(d$NEW.ID_PROG)))
-  if(save.fig) checkRepertories(site)
-
-  coordAll <- aggregate(cbind(d$LON,d$LAT) ~ d$NEW.ID_PROG,data=d,mean)
-  colnames(coordAll)[2:3] <- c("LON","LAT")
-  ID_exclu <- as.character(coordAll$NEW.ID_PROG[which(coordAll$LAT<40)])
-  coordAll <- subset(coordAll,LAT>40)
-
-
-  anneeAll <- unique(subset(d,select=c("NEW.ID_PROG","FIRST.YEAR","LAST.YEAR")))
-  typeAll <-  unique(subset(d,select=c("NEW.ID_PROG","HABITAT")))
-
-  #  coordAll2 <- merge(coordAll2,typeAll,by="NEW.ID_PROG",all=TRUE)
-  #  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
-  colnames(coordAll)[1] <- "NEW.ID_PROG"
-  coordAll2 <- merge(coordAll,typeAll,by="NEW.ID_PROG",all=TRUE)
-  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
-
-
-
-  coordAllh <- coordAll2
-  nbs <- length(unique(coordAllh$NEW.ID_PROG))-1
-  #dcoord.s <- subset(coordAll2,NEW.ID_PROG == ss)
-
-  coordAllh$TAUX<-0
-
-  # for(s in unique(d$NEW.ID_PROG)){
-  #   prop <- 0
-  #   for (y in unique(subset(d,NEW.ID_PROG==s)$YEAR)){
-  #     prop<- prop + nrow(subset(d,YEAR==y & AGE_stage == "JUV" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s))/(nrow(subset(d,YEAR==y & AGE_stage == "AD" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s))+nrow(subset(d,YEAR==y & AGE_stage == "JUV" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s)))
-  #   }
-  #   coordAllh[coordAllh$NEW.ID_PROG==s,]$TAUX<-prop/length(unique(subset(d,NEW.ID_PROG==s)$YEAR))
-  # }
-
-  table_prop <- returnRate.all(d)
-  if(AD){
-    type <- "AD"
-  }  else{
-    type <- "JUV"
-  }
-
-  for(s in unique(d$NEW.ID_PROG)){
-    coordAllh[coordAllh$NEW.ID_PROG==s,]$TAUX<- mean(subset(table_prop,NEW.ID_PROG==s & AGE_first==type)$RETURN)
-  }
-
-  browser()
-
-  world1 <- sf::st_as_sf(map('world', plot = FALSE, fill = TRUE))
-  france <- sf::st_as_sf(map('france', plot = FALSE, fill = TRUE))
-
-
-  mytheme <- theme(plot.title = element_text(face = "bold",size = rel(1.2), hjust = 0.5),
-                   panel.background = element_rect(colour = NA),
-                   plot.background = element_rect(colour = NA),
-                   axis.title = element_text(face = "bold",size = rel(1)),
-                   axis.title.y = element_text(angle=90,vjust =2),
-                   axis.title.x = element_text(vjust = -0.2),
-                   legend.position=NULL)
-
-
-  if(add_title) title_txt <- paste0("Carte du taux de retour annuel des stations pour les ", type) else title_txt <- ""
-  gg <- ggplot()
-  gg <- gg + geom_sf(data = world1,fill="white", colour="#7f7f7f", size=0.2)+ geom_sf(data = france,fill="white", colour="#7f7f7f", size=0.5)
-  gg <- gg + coord_sf(xlim=c(-5,9),ylim=c(41.5,52))
-
-  gg <- gg + geom_point(data = coordAll2,aes(LON,LAT),shape=1,size=1,colour="black")
-  gg <- gg + geom_point(data = coordAllh, aes(LON,LAT,colour=TAUX),size=2,shape=19)
-  gg <- gg + labs(x="",y="",title=title_txt)
-  gg <- gg + scale_colour_gradient2(low = "#b2182b",mid="#92c5de",high = "#053061",name="Taux de retour inter-annuel moyen du site",labels=percent)
-
-
-  if(save.fig) {
-    g <- gg
-    ggfile <- paste("output/France/carte_retour_annuel.png",sep="")
-    catlog(c("Check",ggfile,":"),fileLog)
-    ggsave(ggfile,g)#,height = 10.5,width = 13)
-    catlog(c("\n"),fileLog)
-  }
-
-  if(print.fig)
-    print(gg)
-
-}
-
-
 
 
 ##' .. content for \description{} (no empty lines) ..
@@ -231,11 +132,19 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
     if(is.null(site)) site <- sort(as.character(unique(d$NEW.ID_PROG)))
     if(save.fig) checkRepertories(site)
 
-    coordAll <- aggregate(cbind(d$LON,d$LAT) ~ d$NEW.ID_PROG,data=d,mean)
-    colnames(coordAll)[2:3] <- c("LON","LAT")
+    ## coordAll <- aggregate(cbind(d$LON,d$LAT) ~ d$NEW.ID_PROG,data=d,mean)
+    ## les coordonnées sont conservé dans une table avec les region associé dans le dossier library
+    coordAll <- read.csv2("library/reg_biogeo.csv")
+    
     ID_exclu <- as.character(coordAll$NEW.ID_PROG[which(coordAll$LAT<40)])
     coordAll <- subset(coordAll,LAT>40)
 
+    # on récupère les date de début et fin de chaque station
+    stations <- read.csv("library/NEW.ID_PROG_YEARS.csv")
+    stations <- stations[,c("NEW.ID_PROG","FIRST.YEAR","LAST.YEAR")]
+    coordAll <- merge(coordAll,stations,by="NEW.ID_PROG")
+    
+    
     ## transformation en SpatialPointDataFrame
                                         #   coordinates(coordAll) <- ~ LON + LAT
     ## on déclare le système de coordonnées de référence: dégrés décimaux WGS84
@@ -249,26 +158,33 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
                                         #  ID_exclu <- as.character(coordAll2$NEW.ID_PROG[which(coordAll2$LAT<40)])
                                         #  coordAll2 <- subset(coordAll2,LAT>40)
 
-    anneeAll <- unique(subset(d,select=c("NEW.ID_PROG","FIRST.YEAR","LAST.YEAR")))
-    typeAll <-  unique(subset(d,select=c("NEW.ID_PROG","HABITAT")))
+    
+    ### section inutile les données sont déjà dans coordAll
+    
+   ## anneeAll <- unique(subset(d,select=c("NEW.ID_PROG","FIRST.YEAR","LAST.YEAR")))
+    ##typeAll <-  unique(subset(d,select=c("NEW.ID_PROG","BIOGEO_HAB")))
 
                                         #  coordAll2 <- merge(coordAll2,typeAll,by="NEW.ID_PROG",all=TRUE)
                                         #  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
-    colnames(coordAll)[1] <- "NEW.ID_PROG"
-    coordAll2 <- merge(coordAll,typeAll,by="NEW.ID_PROG",all=TRUE)
-    coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
+  ##  colnames(coordAll)[1] <- "NEW.ID_PROG"
+  ##  coordAll2 <- merge(coordAll,typeAll,by="NEW.ID_PROG",all=TRUE)
+  ##  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
 
 
     for(ss in site)
     {
-        h <- as.character(coordAll2$HABITAT[coordAll2$NEW.ID_PROG==ss])
-        fy <- max(coordAll2$FIRST.YEAR[coordAll2$NEW.ID_PROG==ss] - 1,min(d$YEAR))
-        ly <- min(coordAll2$LAST.YEAR[coordAll2$NEW.ID_PROG==ss] + 1,max(d$YEAR))
+        h <- as.character(coordAll$HABITAT[coordAll2$NEW.ID_PROG==ss])
+        biogeoref <- as.character(coordAll$BIOGEOREF[coordAll2$NEW.ID_PROG==ss])
+        
+        fy <- max(coordAll2$FIRST.YEAR[coordAll$NEW.ID_PROG==ss] - 1,min(d$YEAR))
+        ly <- min(coordAll2$LAST.YEAR[coordAll$NEW.ID_PROG==ss] + 1,max(d$YEAR))
 
 
-        coordAllh <- subset(coordAll2,HABITAT == h & FIRST.YEAR <= ly & LAST.YEAR >= fy)
+        if(biogeoref != "National") coordAllh <- subset(coordAll,BIOGEOREF == biogeoref & HABITAT == h & FIRST.YEAR <= ly & LAST.YEAR >= fy)  else 
+          coordAllh <- subset(coordAll, HABITAT == h & FIRST.YEAR <= ly & LAST.YEAR >= fy) 
+        
         nbs <- length(unique(coordAllh$NEW.ID_PROG))-1
-        dcoord.s <- subset(coordAll2,NEW.ID_PROG == ss)
+        dcoord.s <- subset(coordAll,NEW.ID_PROG == ss)
 
         coordAllh$DUREE <- apply(subset(coordAllh,select=c("FIRST.YEAR","LAST.YEAR")),1,FUN = function(X) (min(X[2],ly) - max(X[1],fy) + 1))
 
@@ -279,6 +195,10 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
         world1 <- sf::st_as_sf(map('world', plot = FALSE, fill = TRUE))
         france <- sf::st_as_sf(map('france', plot = FALSE, fill = TRUE))
 
+        if(biogeoref != "National" & biogeoref == "Atlantique"){
+          sf_biogeoref <- st_read("library/Regions/Tout/Regions.shp")
+          sf_biogeoref <- subset(sf_biogeoref,Regions =="Atlantique") # les régions Atlantique_central et lusitatnien, voir NomRegion.csv
+        }
 
         mytheme <- theme(plot.title = element_text(face = "bold",size = rel(1.2), hjust = 0.5),
                          panel.background = element_rect(colour = NA),
@@ -289,17 +209,19 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
                          legend.position=NULL)
 
 
-        if(add_title) title_txt <- paste0("Localisation de la station ",ss,"\n et des ",nbs," stations de référence de type ",h, "\n suivies entre ",fy," et ",ly) else title_txt <- ""
+        if(add_title) title_txt <- paste0("Localisation de la station ",ss,"\n et des ",nbs," stations de référence  de type ",h, "\n suivies entre ",fy," et ",ly) else title_txt <- ""
         gg <- ggplot()
         gg <- gg + geom_sf(data = world1,fill="white", colour="#7f7f7f", size=0.2)+ geom_sf(data = france,fill="white", colour="#7f7f7f", size=0.5)
-        gg <- gg + coord_sf(xlim=c(-5,9),ylim=c(41.5,52))
+        if(biogeoref != "National") gg <- gg + geom_sf(data= sf_biogeoref, colour = NA, fill = "#feb24c",alpha = 0.7)
+         gg <- gg + coord_sf(xlim=c(-5,9),ylim=c(41.5,52))
 
-        gg <- gg + geom_point(data = coordAll2,aes(LON,LAT),shape=1,size=1,colour="black")
+        gg <- gg + geom_point(data = coordAll,aes(LON,LAT),shape=1,size=1,colour="black")
         gg <- gg + geom_point(data = dcoord.s,aes(LON,LAT), colour="red",size=4)
         gg <- gg + geom_point(data = coordAllh, aes(LON,LAT,colour=DUREE),size=2,shape=19)
         gg <- gg + labs(x="",y="",title=title_txt)
         gg <- gg + scale_colour_gradient2(low = "#b2182b",mid="#92c5de",high = "#053061",midpoint = 3,name="Nombre\nd'années\nde suivi",limits=c(min_duree,max_duree))
-
+      ##  gg
+        
         if(add_local) {
 
             degloc <- 0.25
@@ -2463,3 +2385,113 @@ expPDF <- function(d,site=NULL,system="linux",fileLog="log.txt") {
 
     }
 }
+
+
+
+
+
+
+
+
+#### ------------------------- in progress
+
+# non opérationnel !!! 
+carteTauxAnnuel <- function(d,site=NULL,AD=TRUE,year=NULL,fileLog=NULL,print.fig=TRUE,save.fig=TRUE,add_title=TRUE) {
+  
+  require(rgdal)
+  require(ggmap)
+  require(maptools)
+  library(sf)
+  require(maps)
+  
+  
+  if(!is.null(year)){
+    d<-subset(d,YEAR==year)
+  }
+  
+  france <- map_data("france")
+  if(is.null(site)) site <- sort(as.character(unique(d$NEW.ID_PROG)))
+  if(save.fig) checkRepertories(site)
+  
+  coordAll <- aggregate(cbind(d$LON,d$LAT) ~ d$NEW.ID_PROG,data=d,mean)
+  colnames(coordAll)[2:3] <- c("LON","LAT")
+  ID_exclu <- as.character(coordAll$NEW.ID_PROG[which(coordAll$LAT<40)])
+  coordAll <- subset(coordAll,LAT>40)
+  
+  
+  anneeAll <- unique(subset(d,select=c("NEW.ID_PROG","FIRST.YEAR","LAST.YEAR")))
+  typeAll <-  unique(subset(d,select=c("NEW.ID_PROG","HABITAT")))
+  
+  #  coordAll2 <- merge(coordAll2,typeAll,by="NEW.ID_PROG",all=TRUE)
+  #  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
+  colnames(coordAll)[1] <- "NEW.ID_PROG"
+  coordAll2 <- merge(coordAll,typeAll,by="NEW.ID_PROG",all=TRUE)
+  coordAll2 <- merge(coordAll2,anneeAll,by="NEW.ID_PROG",all=TRUE)
+  
+  
+  
+  coordAllh <- coordAll2
+  nbs <- length(unique(coordAllh$NEW.ID_PROG))-1
+  #dcoord.s <- subset(coordAll2,NEW.ID_PROG == ss)
+  
+  coordAllh$TAUX<-0
+  
+  # for(s in unique(d$NEW.ID_PROG)){
+  #   prop <- 0
+  #   for (y in unique(subset(d,NEW.ID_PROG==s)$YEAR)){
+  #     prop<- prop + nrow(subset(d,YEAR==y & AGE_stage == "JUV" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s))/(nrow(subset(d,YEAR==y & AGE_stage == "AD" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s))+nrow(subset(d,YEAR==y & AGE_stage == "JUV" & ESPECE%in%especes_ageables$ESPECE & NEW.ID_PROG ==s)))
+  #   }
+  #   coordAllh[coordAllh$NEW.ID_PROG==s,]$TAUX<-prop/length(unique(subset(d,NEW.ID_PROG==s)$YEAR))
+  # }
+  
+  table_prop <- returnRate.all(d)
+  if(AD){
+    type <- "AD"
+  }  else{
+    type <- "JUV"
+  }
+  
+  for(s in unique(d$NEW.ID_PROG)){
+    coordAllh[coordAllh$NEW.ID_PROG==s,]$TAUX<- mean(subset(table_prop,NEW.ID_PROG==s & AGE_first==type)$RETURN)
+  }
+  
+  #browser()
+  
+  world1 <- sf::st_as_sf(map('world', plot = FALSE, fill = TRUE))
+  france <- sf::st_as_sf(map('france', plot = FALSE, fill = TRUE))
+  
+  
+  mytheme <- theme(plot.title = element_text(face = "bold",size = rel(1.2), hjust = 0.5),
+                   panel.background = element_rect(colour = NA),
+                   plot.background = element_rect(colour = NA),
+                   axis.title = element_text(face = "bold",size = rel(1)),
+                   axis.title.y = element_text(angle=90,vjust =2),
+                   axis.title.x = element_text(vjust = -0.2),
+                   legend.position=NULL)
+  
+  
+  if(add_title) title_txt <- paste0("Carte du taux de retour annuel des stations pour les ", type) else title_txt <- ""
+  gg <- ggplot()
+  gg <- gg + geom_sf(data = world1,fill="white", colour="#7f7f7f", size=0.2)+ geom_sf(data = france,fill="white", colour="#7f7f7f", size=0.5)
+  gg <- gg + coord_sf(xlim=c(-5,9),ylim=c(41.5,52))
+  
+  gg <- gg + geom_point(data = coordAll2,aes(LON,LAT),shape=1,size=1,colour="black")
+  gg <- gg + geom_point(data = coordAllh, aes(LON,LAT,colour=TAUX),size=2,shape=19)
+  gg <- gg + labs(x="",y="",title=title_txt)
+  gg <- gg + scale_colour_gradient2(low = "#b2182b",mid="#92c5de",high = "#053061",name="Taux de retour inter-annuel moyen du site",labels=percent)
+  
+  
+  if(save.fig) {
+    g <- gg
+    ggfile <- paste("output/France/carte_retour_annuel.png",sep="")
+    catlog(c("Check",ggfile,":"),fileLog)
+    ggsave(ggfile,g)#,height = 10.5,width = 13)
+    catlog(c("\n"),fileLog)
+  }
+  
+  if(print.fig)
+    print(gg)
+  
+}
+
+

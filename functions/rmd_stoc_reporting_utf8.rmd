@@ -64,31 +64,25 @@ d <-  read.table(file_full,sep="\t",dec=".",stringsAsFactor=FALSE,header=TRUE,en
 d <- d %>% mutate_if(is.character, Encoding_utf8)
 
 
-#d <- subset(d,NEW.ID_PROG == site)
+### verifier la selection des données pour le site !!!!! 
+
+d <- subset(d,NEW.ID_PROG == site)
+ 
 hab <- d[1,"HABITAT"]
-reg <- d[1,"BIOGEO"]
+reg <- d[1,"BIOGEOREF"]
 hab_txt <- tolower(hab)
-
 reg<-tolower(reg)
-
-if(hab=="terrestre"){
-  couleur<-"vert"
-}
-if(hab=="aquatique"){
-  couleur<-"bleu"
-}
-
-if(reg=="National"){
-  hab_txt <- paste(hab," de toute la France")
-  reg_txt<-reg
-}
-if(reg!="National"){
-  hab_txt <- paste(hab," de la region '",reg,"'")
-  reg_txt<-reg
-  # if(hab=="Terrestre"){
-  #   reg_txt<-"alpine"
-  # }
-}
+ 
+ 
+ if(reg=="National"){
+   hab_txt <- paste(hab," de toute la France")
+   reg_txt<-reg
+ }
+ if(reg!="National"){
+   hab_txt <- paste(hab," de la region '",reg,"'")
+   reg_txt<-reg
+ }
+ 
 
 
 ## ajout des nom français d'espèces
@@ -147,7 +141,7 @@ subtitle: `r subtitle_r`
 \listoffigures 
 
 
-
+\vspace{2cm}
 
 _Remerciements :_ 
 
@@ -216,8 +210,22 @@ comparées aux autres stations du même groupe:
   des oiseaux paludicoles 
 - Rozo : Stations réalisant le protocole spécifique STOC-ROZO
 
-Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
-Les stations atlantiques terrestres (altantique au sens large, regroupant les régions biogéographiques "Atlantique central" et "Atlantique lusitanien"), sont comparées à l'ensemble des stations atlantiques terrestres.
+
+```{r region}
+if(reg != "National") {
+  txt_reg <- "Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
+Les stations atlantiques terrestres (altantique au sens large, regroupant les régions biogéographiques "Atlantique central" et "Atlantique lusitanien"), sont comparées à l'ensemble des stations atlantiques terrestres."
+  catt(txt_reg)
+}
+}
+
+
+```
+
+
+
+
+
 
 
 Ici, la station `r site` est dans la région `r reg_txt`. 
@@ -229,7 +237,8 @@ temps (figure __\ref{fig:carte}__).
 
 
 
-```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site,"en jaune et des stations avec lequelles elle est comparée en ",couleur,". Les stations représentées par un petit point rouge  sont les autres stations, d'habitat ou de région différente"),fig.scap="La localisation de la station"}
+```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site," en rouge et des stations de même types avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponible pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisable pour la caractériser la référence nationnale.",ifelse(reg!="National",paste0("La région ",reg," est représentée par la zone orangée"),""))
+)),fig.scap="La localisation de la station"}
 
 # carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
 carteSites(d=d,site=site,print.fig=TRUE,save.fig=save.fig)
