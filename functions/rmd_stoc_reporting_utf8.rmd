@@ -21,7 +21,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo =FALSE, eval=TRUE, message = FALSE, warning = FALSE,cache=FALSE)
+knitr::opts_chunk$set(echo =FALSE, eval=TRUE, message = FALSE, warning = FALSE,cache=FALSE,comment = FALSE,error = FALSE)
 
 ```
 
@@ -74,11 +74,11 @@ hab_txt <- tolower(hab)
 reg<-tolower(reg)
  
  
- if(reg=="National"){
+ if(reg=="national"){
    hab_txt <- paste(hab," de toute la France")
    reg_txt<-reg
  }
- if(reg!="National"){
+ if(reg!="national"){
    hab_txt <- paste(hab," de la region '",reg,"'")
    reg_txt<-reg
  }
@@ -212,12 +212,16 @@ comparées aux autres stations du même groupe:
 
 
 ```{r region}
-if(reg != "National") {
-  txt_reg <- "Dans une volonté de comparer des stations similaires,  nous avons découpé la France en différentes régions, selon les régions biogéographiques utilisées par l’Agence européenne pour l’environnement (Plus d’informations dans ce document : http://www.eea.europa.eu/data-and-maps/data/biogeographical-regions-europe-
-2005/methodology-description-pdf-format/methodology-description-pdf-format/at_download/file).
-Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
-Les stations atlantiques terrestres sont comparées à l'ensemble des stations atlantiques terrestres."
-  catt(txt_reg)
+
+if(reg != "national") {
+  txt_reg <- paste0("Dans une volonté de comparer des stations similaires,  nous avons découpé la France en différentes régions, selon les régions biogéographiques utilisées par l’Agence européenne pour l’environnement (Plus d’informations dans ce document : http://www.eea.europa.eu/data-and-maps/data/biogeographical-regions-europe-
+2005/methodology-description-pdf-format/methodology-description-pdf-format/at_download/file).\n
+Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France.\n
+La station ",site," terrestre est dans la région ",reg_txt,", elle sera comparée à l'ensemble des stations ",reg_txt,"s terrestres")
+} else {
+  txt_reg <- paste0("La station ",site," de type ",hab_txt," est comparée au sous-ensemble des stations
+STOC-Capture du type ", hab_txt," et qui ont été en activité en même
+temps")
 }
 
 
@@ -225,13 +229,11 @@ Les stations atlantiques terrestres sont comparées à l'ensemble des stations a
 ```
 
 
+`r txt_reg` (figure __\ref{fig:carte}__).
 
-Ici, la station `r site` est dans la région `r reg_txt`. 
 
 
-Ainsi la station `r site` de type `r hab_txt` est comparée au sous-ensemble des stations
-STOC-Capture du type `r hab_txt` et qui ont été en activité en même
-temps (figure __\ref{fig:carte}__). 
+
 
 
 ```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site," en rouge et des stations de même types avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponible pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisable pour la caractériser la référence nationnale.",ifelse(reg!="National",paste0("La région ",reg," est représentée par la zone orangée"),"")),fig.scap="La localisation de la station"}

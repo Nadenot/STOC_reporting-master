@@ -196,7 +196,7 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
         france <- sf::st_as_sf(map('france', plot = FALSE, fill = TRUE))
 
         if(biogeoref != "National" & biogeoref == "Atlantique"){
-          sf_biogeoref <- st_read("library/Regions/Tout/Regions.shp")
+          sf_biogeoref <- st_read("library/Regions/Tout/Regions.shp", quiet = TRUE)
           sf_biogeoref <- subset(sf_biogeoref,Regions =="Atlantique") # les régions Atlantique_central et lusitatnien, voir NomRegion.csv
         }
 
