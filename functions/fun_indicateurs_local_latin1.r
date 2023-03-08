@@ -173,11 +173,11 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
 
     for(ss in site)
     {
-        h <- as.character(coordAll$HABITAT[coordAll2$NEW.ID_PROG==ss])
-        biogeoref <- as.character(coordAll$BIOGEOREF[coordAll2$NEW.ID_PROG==ss])
+        h <- as.character(coordAll$HABITAT[coordAll$NEW.ID_PROG==ss])
+        biogeoref <- as.character(coordAll$BIOGEOREF[coordAll$NEW.ID_PROG==ss])
         
-        fy <- max(coordAll2$FIRST.YEAR[coordAll$NEW.ID_PROG==ss] - 1,min(d$YEAR))
-        ly <- min(coordAll2$LAST.YEAR[coordAll$NEW.ID_PROG==ss] + 1,max(d$YEAR))
+        fy <- max(coordAll$FIRST.YEAR[coordAll$NEW.ID_PROG==ss] - 1,min(d$YEAR))
+        ly <- min(coordAll$LAST.YEAR[coordAll$NEW.ID_PROG==ss] + 1,max(d$YEAR))
 
 
         if(biogeoref != "National") coordAllh <- subset(coordAll,BIOGEOREF == biogeoref & HABITAT == h & FIRST.YEAR <= ly & LAST.YEAR >= fy)  else 
@@ -231,13 +231,13 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
             lon_max <- max(dcoord.s$LON,na.rm=TRUE) + degloc
 
 
-            coordAll2.loc <- subset(coordAll2,LAT > lat_min & LAT < lat_max & LON > lon_min & LON < lon_max)
+            coordAll.loc <- subset(coordAll,LAT > lat_min & LAT < lat_max & LON > lon_min & LON < lon_max)
             coordAllh.loc <- subset(coordAllh,LAT > lat_min & LAT < lat_max & LON > lon_min & LON < lon_max)
 
             map <- openmap(c(lat_max,lon_min), c(lat_min,lon_max), zoom = NULL,type = c("osm", "stamen-toner", "stamen-terrain","stamen-watercolor", "esri","esri-topo")[1], mergeTiles = TRUE)
             map.latlon <- openproj(map, projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
             ggloc <- autoplot(map.latlon)  + labs(x = "", y="")
-            ggloc <- ggloc + geom_point(data = coordAll2.loc,aes(x=LON,y=LAT),shape=1,size=1,colour="black")
+            ggloc <- ggloc + geom_point(data = coordAll.loc,aes(x=LON,y=LAT),shape=1,size=1,colour="black")
             ggloc <- ggloc + geom_point(data = dcoord.s,aes(x=LON,y=LAT), colour="red",size=4)
             ggloc <- ggloc + geom_point(data =coordAllh.loc, aes(x=LON,y=LAT,colour=DUREE),size=2,shape=19)
             ggloc <- ggloc + labs(x="",y="",title="",fy," et ",ly,sep="")

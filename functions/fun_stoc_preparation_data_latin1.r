@@ -799,6 +799,8 @@ import <- function(file="extrait.txt",lastYear=NULL,
     d$SEXE_FIRST[grep("F",d$SEXE_FIRST_VOL,fixed=TRUE)] <- "F"
     d$SEXE_FIRST[d$SEXE_FIRST_VOL == "?"] <- "U"
     d$SEXE_FIRST_INCERTITUDE[grep("?",d$SEXE_FIRST_VOL,fixed=TRUE)] <- TRUE
+    
+    d <- as.data.frame(d) # sinon on n'a plus un dataframe, sûrement lié à l'utilisation de data.table plus haut
 
     d <- d[,which(colnames(d)!="SEXE_FIRST_VOL")]
 
