@@ -213,18 +213,16 @@ comparées aux autres stations du même groupe:
 
 ```{r region}
 if(reg != "National") {
-  txt_reg <- "Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
-Les stations atlantiques terrestres (altantique au sens large, regroupant les régions biogéographiques "Atlantique central" et "Atlantique lusitanien"), sont comparées à l'ensemble des stations atlantiques terrestres."
+  txt_reg <- "Dans une volonté de comparer des stations similaires,  nous avons découpé la France en différentes régions, selon les régions biogéographiques utilisées par l’Agence européenne pour l’environnement (Plus d’informations dans ce document : http://www.eea.europa.eu/data-and-maps/data/biogeographical-regions-europe-
+2005/methodology-description-pdf-format/methodology-description-pdf-format/at_download/file).
+Il est à noter que, par manque de données, les stations STOC-rozo et aquatiques sont comparées entre elles et que les stations alpines (d'altitude supérieure à 1200m), méditerranéeennes et continentales sont comparées à toutes les stations terrestres de France. 
+Les stations atlantiques terrestres sont comparées à l'ensemble des stations atlantiques terrestres."
   catt(txt_reg)
 }
-}
+
 
 
 ```
-
-
-
-
 
 
 
@@ -236,14 +234,11 @@ STOC-Capture du type `r hab_txt` et qui ont été en activité en même
 temps (figure __\ref{fig:carte}__). 
 
 
+```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site," en rouge et des stations de même types avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponible pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisable pour la caractériser la référence nationnale.",ifelse(reg!="National",paste0("La région ",reg," est représentée par la zone orangée"),"")),fig.scap="La localisation de la station"}
 
-```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site," en rouge et des stations de même types avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponible pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisable pour la caractériser la référence nationnale.",ifelse(reg!="National",paste0("La région ",reg," est représentée par la zone orangée"),""))
-)),fig.scap="La localisation de la station"}
-
-# carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
-carteSites(d=d,site=site,print.fig=TRUE,save.fig=save.fig)
- 
+carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
 ```
+
 
 
 ## La standardisation
