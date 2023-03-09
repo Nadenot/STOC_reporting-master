@@ -173,8 +173,8 @@ carteStation <- function(site=NULL,d,add_local=FALSE,fileLog=NULL,print.fig=TRUE
 
     for(ss in site)
     {
-        h <- as.character(coordAll$HABITAT[coordAll$NEW.ID_PROG==ss])
-        biogeoref <- as.character(coordAll$BIOGEOREF[coordAll$NEW.ID_PROG==ss])
+        h <- as.character(unique(coordAll$HABITAT[coordAll$NEW.ID_PROG==ss]))
+        biogeoref <- as.character(unique(coordAll$BIOGEOREF[coordAll$NEW.ID_PROG==ss]))
         
         fy <- max(coordAll$FIRST.YEAR[coordAll$NEW.ID_PROG==ss] - 1,min(d$YEAR))
         ly <- min(coordAll$LAST.YEAR[coordAll$NEW.ID_PROG==ss] + 1,max(d$YEAR))
@@ -1189,8 +1189,8 @@ productivityYearSpecies.site <- function(d,site=NULL,species=NULL,nom_sp=NULL,fi
 
                 aggTable.ss <- subset(aggTable.s,ESPECE == sp)
 
-                if(nrow(aggTable.ss)>0) {
-                      } #END if(nrow(aggTable.ss)>0)
+                # if(nrow(aggTable.ss)>0) {
+                #       } #END if(nrow(aggTable.ss)>0)
 
                 if(facet) if(!is.null(nom_sp)) aggTable.ss$facet <- as.character(t_nom_sp$nom_sp[t_nom_sp$species == sp]) else aggTable.ss$facet <- sp
 
@@ -1305,8 +1305,8 @@ productivityYearSpecies.sitereg <- function(d,site=NULL,species=NULL,nom_sp=NULL
 
         aggTable.ss <- subset(aggTable.s,ESPECE == sp)
 
-        if(nrow(aggTable.ss)>0) {
-        } #END if(nrow(aggTable.ss)>0)
+        # if(nrow(aggTable.ss)>0) {
+        # } #END if(nrow(aggTable.ss)>0)
 
         if(facet) if(!is.null(nom_sp)) aggTable.ss$facet <- as.character(t_nom_sp$nom_sp[t_nom_sp$species == sp]) else aggTable.ss$facet <- sp
 
