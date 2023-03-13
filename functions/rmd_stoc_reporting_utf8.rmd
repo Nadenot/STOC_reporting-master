@@ -66,17 +66,16 @@ d <- d %>% mutate_if(is.character, Encoding_utf8)
 
 ### verifier la selection des données pour le site !!!!! 
 
-# d <- subset(d,NEW.ID_PROG == site)  
-# Si on ne garde que la station on ne peut plus calculer les références
- 
-hab <- d[1,"HABITAT"]
-reg <- d[1,"BIOGEOREF"]
+ds <- subset(d,NEW.ID_PROG == site)
+
+hab <- ds[1,"HABITAT"]
+reg <- ds[1,"BIOGEOREF"]
 hab_txt <- tolower(hab)
 reg<-tolower(reg)
  
  
  if(reg=="national"){
-   hab_txt <- paste(hab," de toute la France")
+   hab_txt <- paste(hab," national")
    reg_txt<-reg
  }
  if(reg!="national"){
@@ -237,7 +236,7 @@ temps")
 
 
 
-```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la stations",site," en rouge et des stations de même types avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponible pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisables pour caractériser la référence.",ifelse(reg!="National",paste0("La région ",reg," est représentée par la zone orangée"),"")),fig.scap="La localisation de la station"}
+```{r fig.carte, eval=TRUE,fig.align = 'center', out.width='100%',fig.cap=paste("\\label{fig:carte}Localisation de la station",site," en rouge et des stations de même type avec lequelles elle est comparée en dégradé de bleu présentant le nombre d'années de données disponibles pour la comparaison. Les stations notées par un petit cercle vide sont les stations qui ne sont pas utilisables pour caractériser la référence.",ifelse(reg!="national",paste0("La région ",reg," est représentée par la zone orangée"),"")),fig.scap="La localisation de la station"}
 
 carteStation(site=site,d=d,add_local=FALSE,fileLog=fileLog,print.fig=TRUE,save.fig=save.fig,add_title=FALSE)
 ```
@@ -438,12 +437,12 @@ Ici nous considérons toutes les espèces capturées sur la station `r site`. La
 figure __\ref{fig:com}__ représente la constitution de la
 communauté locale et leurs effectifs
 capturés. Elle montre également la distribution des captures de
-ces espéces dans les stations de même type (parmi les stations
-qui capturent l'espéce). Ainsi la figure __\ref{fig:com}__
+ces espèces dans les stations de même type (parmi les stations
+qui capturent l'espèce). Ainsi la figure __\ref{fig:com}__
 permet d'apprécier les paricularités de la station.
 
 
-```{r fig.com, eval=TRUE,fig.align = 'center', out.width='90%',fig.cap=paste("\\label{fig:com}Nombre d'adulte capturés par espèce sur la station ",site,", les points dégradés du jaune au rouge (correspondant aux années) représentent les données locales, les boîtes à moustaches bleues représentent la distribution ", reg_txt,"  de ces captures sur les stations de type ",hab_txt," et qui capturent l'espèce. Le nombre de stations qui capturent l'espèce est noté entre parenthèses",sep=""),fig.scap="Les espèces capturées"}
+```{r fig.com, eval=TRUE,fig.align = 'center', out.width='90%',fig.cap=paste("\\label{fig:com}Nombre d'adulte capturés par espèce sur la station ",site,", les points dégradés du jaune au rouge (correspondant aux années) représentent les données locales, les boîtes à moustaches bleues représentent la distribution ", ifelse(reg_txt != "national", "régionale", "nationale"), "  de ces captures sur les stations de type ",hab_txt," et qui capturent l'espèce. Le nombre de stations qui capturent l'espèce est noté entre parenthèses",sep=""),fig.scap="Les espèces capturées"}
 
 d_capt_site <- speciesRelativeAbund.site(d,site=site,col_nomsp = "nom_fr",fileLog=fileLog,print.fig=TRUE,save.fig=FALSE,add_title=FALSE,return_table=TRUE)
 
@@ -475,7 +474,7 @@ des variations de survie, de reproduction et de dispersion entre
 années. 
 Cet indice d'abondance est
 calculé à partir des captures d'adultes et est standardisé pour
-correspondre aux captures sur 3 sessions par 120 métres de filets.
+correspondre aux captures sur 3 sessions par 120 mètres de filets.
 
 
 
@@ -623,7 +622,7 @@ if(fig_sp) {
 `r txt.prodsp`
 
 
-```{r fig.prod, eval=TRUE,fig.align = 'center', out.width='75%',fig.cap=paste("\\label{fig:prod}Variation de la productivité globale pour la station ",site,". En bleu, la variation nationale des quantiles de l'indicateur (médiane, 50\\% et 95\\%) pour les station de type ",hab_txt,", en rouge la variation pour la station ",site,".",sep=""),fig.scap="Variation de la productivité"}
+```{r fig.prod, eval=TRUE,fig.align = 'center', out.width='75%',fig.cap=paste("\\label{fig:prod}Variation de la productivité globale pour la station ",site,". En bleu, la variation ",ifelse(reg_txt != "national", "régionale", "nationale"), " des quantiles de l'indicateur (médiane, 50\\% et 95\\%) pour les station de type ",hab_txt,", en rouge la variation pour la station ",site,".",sep=""),fig.scap="Variation de la productivité"}
 
 productivityYear.site(d,site=site,fileLog=fileLog,print.fig=TRUE,save.fig=FALSE,add_title=FALSE)
 
@@ -688,8 +687,8 @@ if(nrow(d_capt_site_cc) > 0 ) {
         
         nsite <- d_capt_site_cc$nb_site
         lab <-"\\label{fig:cc"
-        t1 <- "Variation de la condition corporelle des "
-        t2 <- paste0(" pour le station ",site," comparée aux STOC-Capture de type ",hab_txt)
+        t1 <- "Variation de la condition corporelle de "
+        t2 <- paste0(" pour la station ",site," comparée aux STOC-Capture de type ",hab_txt)
         
         cap_txt <- paste0(lab,vec_sp,"}",t1,sp_nom,t2," (n=",nsite,")")
         scap_txt <- paste0("Variation de la condition corporelle de ",sp_nom)
@@ -742,7 +741,7 @@ if(fig_sp) {
 \textit{Condition corporelle spécifique}_i = \frac{M_{i,s,a}}{\breve{l}_{s,a}}
 \end{equation}
 
-```{r fig.bc, eval=TRUE,fig.align = 'center', out.width='75%',fig.cap=paste("\\label{fig:bc}Variation de la condition corporelle globale pour la station ",site,".En bleu, la variation des quantiles de l'indicateur de référence (médiane, 50\\% et 95\\%) pour les stations de type ",hab_txt,", en rouge et orange la variation pour la station ",site,sep=""),fig.scap="Variation de la condition corporelle globale"}
+```{r fig.bc, eval=TRUE,fig.align = 'center', out.width='75%',fig.cap=paste("\\label{fig:bc}Variation de la condition corporelle globale pour la station ",site,". En bleu, la variation des quantiles de l'indicateur de référence (médiane, 50\\% et 95\\%) pour les stations de type ",hab_txt,", en rouge et orange la variation pour la station ",site,sep=""),fig.scap="Variation de la condition corporelle globale"}
 
  bodyCondition.site(d,site=site,community_level=TRUE,species_level=FALSE,species=NULL,nom_sp=NULL,fileLog=fileLog,print.fig=TRUE,save.fig=FALSE,add_title=FALSE,facet=FALSE)
 
