@@ -63,3 +63,4 @@ library/tnc_terr_ecoregions.sbx
 *.cpg
 *.txt
 *.qgz
+library/Regions/d_regbiogeo.csv
